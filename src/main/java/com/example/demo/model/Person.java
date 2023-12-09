@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class Person {
     private final String name;
 
     @Relationship(type = "PARENT",direction = Relationship.Direction.OUTGOING)
-    private List<Person> childs = new ArrayList<>();
+    private List<Person> children = new ArrayList<>();
 
     @Relationship(type = "CHILD",direction = Relationship.Direction.OUTGOING)
     private List<Person> parents = new ArrayList<>();
@@ -27,8 +26,8 @@ public class Person {
         return name;
     }
 
-    public List<Person> getChilds() {
-        return childs;
+    public List<Person> getChildren() {
+        return children;
     }
 
     public Person(String name) {
