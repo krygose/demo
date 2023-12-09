@@ -24,6 +24,36 @@ public class PersonService {
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
+    public void addNode(String name) throws Exception{
+        try(var sesion = driver.session()){
+            sesion.run("CREATE (fb:Person {name: \""+ name+"\"})");
+        }
+    }
+    public void addNodeWithRelationParent(String name, String familyName) throws Exception{
+        try(var sesion = driver.session()){
+            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
+                    " with "+name.toLowerCase().trim() +
+                    "match ("+familyName.toLowerCase().trim()+":Person)"+
+                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
+                    "create ("+name.toLowerCase().trim()+")-[:PARENT]->("+familyName.toLowerCase().trim()+")"+
+                    "create ("+name.toLowerCase().trim()+")<-[:CHILD]-("+familyName.toLowerCase().trim()+")"
+            );
+        }
+    }
+    public void addNodeWithRelationChild(String name, String familyName) throws Exception{
+        try(var sesion = driver.session()){
+            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
+                    " with "+name.toLowerCase().trim() +
+                    "match ("+familyName.toLowerCase().trim()+":Person)"+
+                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
+                    "create ("+familyName.toLowerCase().trim()+")-[:PARENT]->("+name.toLowerCase().trim()+")"+
+                    "create ("+familyName.toLowerCase().trim()+")<-[:CHILD]-("+name.toLowerCase().trim()+")"
+
+            );
+        }
+    }
+
+
     private static PersonDto toPersonDto(Person person) {
         return new PersonDto(
                 person.getName(),
