@@ -26,32 +26,39 @@ public class PersonService {
 
     public void addNode(String name) throws Exception{
         try(var sesion = driver.session()){
-            sesion.run("CREATE (fb:Person {name: \""+ name+"\"})");
+            sesion.run("MATCH (c:Count)\n" +
+                            "            SET c.count = c.count + 1\n" +
+                            "            WITH c.count AS newId"+
+                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
         }
     }
-    public void addNodeWithRelationParent(String name, String familyName) throws Exception{
+    public void addNodeWithRelationParent(String name, Integer personId) throws Exception{
         try(var sesion = driver.session()){
-            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
-                    " with "+name.toLowerCase().trim() +
-                    "match ("+familyName.toLowerCase().trim()+":Person)"+
-                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
-                    "create ("+name.toLowerCase().trim()+")-[:PARENT]->("+familyName.toLowerCase().trim()+")"+
-                    "create ("+name.toLowerCase().trim()+")<-[:CHILD]-("+familyName.toLowerCase().trim()+")"
+            sesion.run("MATCH (c:Count)\n" +
+                    "            SET c.count = c.count + 1\n" +
+                    "            WITH c.count AS newId"+
+                    "CREATE ("+ name.toLowerCase().trim() +":Person {id: toString(newId),name: \""+ name +"\"})"
             );
         }
-    }
-    public void addNodeWithRelationChild(String name, String familyName) throws Exception{
-        try(var sesion = driver.session()){
-            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
-                    " with "+name.toLowerCase().trim() +
-                    "match ("+familyName.toLowerCase().trim()+":Person)"+
-                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
-                    "create ("+familyName.toLowerCase().trim()+")-[:PARENT]->("+name.toLowerCase().trim()+")"+
-                    "create ("+familyName.toLowerCase().trim()+")<-[:CHILD]-("+name.toLowerCase().trim()+")"
-
-            );
+        try(var session = driver.session()) {
+            session.run("match (a:Person{id:"+ personId +"}),("+name.toLowerCase().trim()+":Person),(c:Count)"+
+                    "where"+name.toLowerCase().trim()+".id=c.count"+
+                    "create ("+name.toLowerCase().trim()+")<-[:PARENT]-(a)"+
+                    "create ("+name.toLowerCase().trim()+")-[:CHILD]->(a)");
         }
     }
+//    public void addNodeWithRelationChild(String name, String familyName) throws Exception{
+//        try(var sesion = driver.session()){
+//            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
+//                    " with "+name.toLowerCase().trim() +
+//                    "match ("+familyName.toLowerCase().trim()+":Person)"+
+//                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
+//                    "create ("+familyName.toLowerCase().trim()+")-[:PARENT]->("+name.toLowerCase().trim()+")"+
+//                    "create ("+familyName.toLowerCase().trim()+")<-[:CHILD]-("+name.toLowerCase().trim()+")"
+//
+//            );
+//        }
+//    }
 
 
     private static PersonDto toPersonDto(Person person) {
