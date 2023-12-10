@@ -10,6 +10,7 @@ import java.util.List;
 @Node("Person")
 public class Person {
     @Id
+    private final String id;
     private final String name;
 
     @Relationship(type = "PARENT",direction = Relationship.Direction.OUTGOING)
@@ -25,12 +26,16 @@ public class Person {
     public String getName() {
         return name;
     }
+    public Integer getId() {
+        return Integer.parseInt(this.id);
+    }
 
     public List<Person> getChildren() {
         return children;
     }
 
-    public Person(String name) {
+    public Person(String id, String name) {
+        this.id = id;
         this.name = name;
     }
 }

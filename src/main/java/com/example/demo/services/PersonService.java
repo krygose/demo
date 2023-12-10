@@ -56,19 +56,19 @@ public class PersonService {
 
     private static PersonDto toPersonDto(Person person) {
         return new PersonDto(
+                person.getId(),
                 person.getName(),
                 person.getChildren().stream()
                         .map(PersonService::toPersonDto).toList());
     }
 
-
-
-
-    interface PersonRepository extends Neo4jRepository<Person,String> {
+    interface PersonRepository extends Neo4jRepository<Person, String> {
         public default Person findElder(){
             List<Person> tmp = new ArrayList<>();
             Person max = null;
-            for(Person k : this.findAll()){
+            List<Person> allPeopleInDb = this.findAll();
+
+            for(Person k : allPeopleInDb){
                 if(k.getParents().size() == 0){
                     tmp.add(k);
                 }
