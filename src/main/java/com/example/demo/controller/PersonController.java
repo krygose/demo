@@ -18,4 +18,14 @@ public class PersonController {
     public PersonDto getRoot() {
         return personService.getRoot();
     }
+
+    @GetMapping("/addNode")
+    public PersonDto addNode() throws Exception {
+        return personService.addNode("czlek");
+    }
+
+    @GetMapping("/addNodeWithParent")
+    public PersonDto addNodeWithParent() throws Exception {
+        return personService.addNodeWithRelationParent("czlek2",1);
+    }
 }

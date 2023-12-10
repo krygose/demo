@@ -9,7 +9,9 @@ import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @EnableNeo4jRepositories(considerNestedRepositories = true)
@@ -24,41 +26,42 @@ public class PersonService {
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
-    public void addNode(String name) throws Exception{
+    public PersonDto addNode(String name) throws Exception{
         try(var sesion = driver.session()){
-            sesion.run("MATCH (c:Count)\n" +
-                            "            SET c.count = c.count + 1\n" +
-                            "            WITH c.count AS newId"+
-                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
-        }
-    }
-    public void addNodeWithRelationParent(String name, Integer personId) throws Exception{
-        try(var sesion = driver.session()){
-            sesion.run("MATCH (c:Count)\n" +
+            String tmp = new String("MATCH (c:Count)\n" +
                     "            SET c.count = c.count + 1\n" +
                     "            WITH c.count AS newId"+
-                    "CREATE ("+ name.toLowerCase().trim() +":Person {id: toString(newId),name: \""+ name +"\"})"
-            );
+                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
+
+
+            sesion.run("MATCH (c:Count)\n" +
+                            "            SET c.count = c.count + 1\n" +
+                            "            WITH c.count AS newId\n"+
+                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
         }
-        try(var session = driver.session()) {
-            session.run("match (a:Person{id:"+ personId +"}),("+name.toLowerCase().trim()+":Person),(c:Count)"+
-                    "where"+name.toLowerCase().trim()+".id=c.count"+
-                    "create ("+name.toLowerCase().trim()+")<-[:PARENT]-(a)"+
-                    "create ("+name.toLowerCase().trim()+")-[:CHILD]->(a)");
-        }
+        return PersonService.toPersonDto(personRepository.findElder());
     }
-//    public void addNodeWithRelationChild(String name, String familyName) throws Exception{
-//        try(var sesion = driver.session()){
-//            sesion.run("CREATE ("+ name.toLowerCase().trim() +":Person {name: \""+ name +"\"})" +
-//                    " with "+name.toLowerCase().trim() +
-//                    "match ("+familyName.toLowerCase().trim()+":Person)"+
-//                    "where "+familyName.toLowerCase().trim()+" = \""+ familyName +"\""+
-//                    "create ("+familyName.toLowerCase().trim()+")-[:PARENT]->("+name.toLowerCase().trim()+")"+
-//                    "create ("+familyName.toLowerCase().trim()+")<-[:CHILD]-("+name.toLowerCase().trim()+")"
-//
-//            );
-//        }
-//    }
+    public PersonDto addNodeWithRelationParent(String name, Integer personId) throws Exception{
+        try(var sesion = driver.session()){
+            String personName = personRepository.findById(personId.toString()).get().getName().toLowerCase().trim();
+            var splitName = personName.split(" ");
+            if(Arrays.stream(splitName).count()>1){
+                personName=splitName[0]+splitName[1];
+            }
+            sesion.run("MATCH (c:Count)\n" +
+                    "SET c.count = c.count + 1\n" +
+                    "WITH c.count AS newId\n"+
+                    "CREATE ("+ name.toLowerCase().trim() +":Person {id: toString(newId),name: \""+ name +"\"}\n)"+
+                    "WITH * \n"+
+                    "MATCH (c:Count)\n" +
+                    "WITH c.count AS newId\n"+
+                    "match ("+personName+":Person{id:'"+ personId +"'}),("+name.toLowerCase().trim()+":Person {id: toString(newId)})\n"+
+                    "create ("+name.toLowerCase().trim()+")<-[:PARENT]-("+personName.trim()+")\n"+
+                    "create ("+name.toLowerCase().trim()+")-[:CHILD]->("+personName.trim()+")");
+        }
+        return PersonService.toPersonDto(personRepository.findElder());
+    }
+
 
 
     private static PersonDto toPersonDto(Person person) {
