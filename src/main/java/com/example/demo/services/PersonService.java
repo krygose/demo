@@ -26,14 +26,23 @@ public class PersonService {
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
+    public void deleteAll() throws Exception{
+        try(var sesion = driver.session()){
+            sesion.run("MATCH (n:Person)\n" +
+                    "      detach delete n");
+        }
+    }
+
+    public PersonDto deleteNode(int id) throws Exception{
+        try(var sesion = driver.session()){
+            sesion.run("MATCH (n:Person{id:'"+id+"'})\n" +
+                    "      detach delete n");
+        }
+        return PersonService.toPersonDto(personRepository.findElder());
+    }
+
     public PersonDto addNode(String name) throws Exception{
         try(var sesion = driver.session()){
-            String tmp = new String("MATCH (c:Count)\n" +
-                    "            SET c.count = c.count + 1\n" +
-                    "            WITH c.count AS newId"+
-                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
-
-
             sesion.run("MATCH (c:Count)\n" +
                             "            SET c.count = c.count + 1\n" +
                             "            WITH c.count AS newId\n"+
@@ -41,6 +50,8 @@ public class PersonService {
         }
         return PersonService.toPersonDto(personRepository.findElder());
     }
+
+
     public PersonDto addNodeWithRelationParent(String name, Integer personId) throws Exception{
         try(var sesion = driver.session()){
             String personName = personRepository.findById(personId.toString()).get().getName().toLowerCase().trim();
