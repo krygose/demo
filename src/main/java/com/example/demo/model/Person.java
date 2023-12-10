@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
@@ -10,10 +11,14 @@ import java.util.List;
 
 @Node("Person")
 public class Person {
+
     @Id
     private final String id;
     @Property
     private final String name;
+
+
+
 
     @Relationship(type = "PARENT",direction = Relationship.Direction.OUTGOING)
     private List<Person> children = new ArrayList<>();
@@ -29,7 +34,7 @@ public class Person {
         return name;
     }
     public Integer getId() {
-        return Integer.parseInt(this.id);
+        return Integer.parseInt(id);
     }
 
     public List<Person> getChildren() {
