@@ -30,6 +30,16 @@ public class PersonController {
         return personService.addNodeWithRelationParent("czlek6",22);
     }
 
+    @PostMapping("/countCousins")
+    public Integer countCousin() throws Exception {
+        return personService.countCousins(8);
+    }
+
+    @PostMapping("/countSiblings")
+    public Integer countSiblings() throws Exception {
+        return personService.countSiblings(8);
+    }
+
     @DeleteMapping("/deleteAll")
     public ResponseEntity<ResponseDto> deleteAll() throws Exception {
         personService.deleteAll();

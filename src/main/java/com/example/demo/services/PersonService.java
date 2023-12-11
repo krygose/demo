@@ -41,6 +41,27 @@ public class PersonService {
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
+    public int countSiblings(int id) throws Exception{
+        try(var sesion = driver.session()){
+            var result = sesion.run("match (Person {id: '"+id+"'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
+                    "return  count(DISTINCT child.name)");
+            var res = result.stream().findFirst().get().values().get(0).asInt();
+            return result.stream().findFirst().get().values().get(0).asInt();
+        }
+
+    }
+
+    public int countCousins(int id) throws Exception{
+
+        try(var sesion = driver.session()){
+            var result = sesion.run("match (Person {id: '"+id+"'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
+                    "return Count(distinct child.name)");
+            var res = result.stream().findFirst().get().values().get(0).asInt();
+            return res;
+        }
+
+    }
+
     public PersonDto addNode(String name) throws Exception{
         try(var sesion = driver.session()){
             sesion.run("MATCH (c:Count)\n" +
