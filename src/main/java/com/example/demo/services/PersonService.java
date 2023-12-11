@@ -48,10 +48,11 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
                         "return  count(DISTINCT child.name)");
+                if(result.stream().findFirst().get()!= null)
                 return result.stream().findFirst().get().values().get(0).asInt();
+                else return 0;
             }
         }
-
         return 0;
     }
 
@@ -60,10 +61,11 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
                         "return Count(distinct child.name)");
+                if(result.stream().findFirst().get()!= null)
                 return result.stream().findFirst().get().values().get(0).asInt();
+                else return 0;
             }
         }
-
         return 0;
     }
 
