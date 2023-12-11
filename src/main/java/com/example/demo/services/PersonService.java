@@ -34,62 +34,69 @@ public class PersonService {
     }
 
     public PersonDto deleteNode(int id) throws Exception{
-        try(var sesion = driver.session()){
-            sesion.run("MATCH (n:Person{id:'"+id+"'})\n" +
-                    "      detach delete n");
+        if(id  > 0) {
+            try (var sesion = driver.session()) {
+                sesion.run("MATCH (n:Person{id:'" + id + "'})\n" +
+                        "      detach delete n");
+            }
         }
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
     public int countSiblings(int id) throws Exception{
-        try(var sesion = driver.session()){
-            var result = sesion.run("match (Person {id: '"+id+"'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
-                    "return  count(DISTINCT child.name)");
-            var res = result.stream().findFirst().get().values().get(0).asInt();
-            return result.stream().findFirst().get().values().get(0).asInt();
+        if(id  > 0) {
+            try (var sesion = driver.session()) {
+                var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
+                        "return  count(DISTINCT child.name)");
+                var res = result.stream().findFirst().get().values().get(0).asInt();
+                return result.stream().findFirst().get().values().get(0).asInt();
+            }
         }
-
     }
 
     public int countCousins(int id) throws Exception{
-
-        try(var sesion = driver.session()){
-            var result = sesion.run("match (Person {id: '"+id+"'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
-                    "return Count(distinct child.name)");
-            var res = result.stream().findFirst().get().values().get(0).asInt();
-            return res;
+        if(id  > 0) {
+            try (var sesion = driver.session()) {
+                var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
+                        "return Count(distinct child.name)");
+                var res = result.stream().findFirst().get().values().get(0).asInt();
+                return res;
+            }
         }
-
     }
 
     public PersonDto addNode(String name) throws Exception{
-        try(var sesion = driver.session()){
-            sesion.run("MATCH (c:Count)\n" +
-                            "            SET c.count = c.count + 1\n" +
-                            "            WITH c.count AS newId\n"+
-                    "CREATE ("+name.toLowerCase().trim()+":Person {id: toString(newId),name: \""+ name+"\"})");
+        if(name != null) {
+            try (var sesion = driver.session()) {
+                sesion.run("MATCH (c:Count)\n" +
+                        "            SET c.count = c.count + 1\n" +
+                        "            WITH c.count AS newId\n" +
+                        "CREATE (" + name.toLowerCase().trim() + ":Person {id: toString(newId),name: \"" + name + "\"})");
+            }
         }
         return PersonService.toPersonDto(personRepository.findElder());
     }
 
 
     public PersonDto addNodeWithRelationParent(String name, Integer personId) throws Exception{
-        try(var sesion = driver.session()){
-            String personName = personRepository.findById(personId.toString()).get().getName().toLowerCase().trim();
-            var splitName = personName.split(" ");
-            if(Arrays.stream(splitName).count()>1){
-                personName=splitName[0]+splitName[1];
+        if(name != null && personId  > 0) {
+            try (var sesion = driver.session()) {
+                String personName = personRepository.findById(personId.toString()).get().getName().toLowerCase().trim();
+                var splitName = personName.split(" ");
+                if (Arrays.stream(splitName).count() > 1) {
+                    personName = splitName[0] + splitName[1];
+                }
+                sesion.run("MATCH (c:Count)\n" +
+                        "SET c.count = c.count + 1\n" +
+                        "WITH c.count AS newId\n" +
+                        "CREATE (" + name.toLowerCase().trim() + ":Person {id: toString(newId),name: \"" + name + "\"}\n)" +
+                        "WITH * \n" +
+                        "MATCH (c:Count)\n" +
+                        "WITH c.count AS newId\n" +
+                        "match (" + personName + ":Person{id:'" + personId + "'}),(" + name.toLowerCase().trim() + ":Person {id: toString(newId)})\n" +
+                        "create (" + name.toLowerCase().trim() + ")<-[:PARENT]-(" + personName.trim() + ")\n" +
+                        "create (" + name.toLowerCase().trim() + ")-[:CHILD]->(" + personName.trim() + ")");
             }
-            sesion.run("MATCH (c:Count)\n" +
-                    "SET c.count = c.count + 1\n" +
-                    "WITH c.count AS newId\n"+
-                    "CREATE ("+ name.toLowerCase().trim() +":Person {id: toString(newId),name: \""+ name +"\"}\n)"+
-                    "WITH * \n"+
-                    "MATCH (c:Count)\n" +
-                    "WITH c.count AS newId\n"+
-                    "match ("+personName+":Person{id:'"+ personId +"'}),("+name.toLowerCase().trim()+":Person {id: toString(newId)})\n"+
-                    "create ("+name.toLowerCase().trim()+")<-[:PARENT]-("+personName.trim()+")\n"+
-                    "create ("+name.toLowerCase().trim()+")-[:CHILD]->("+personName.trim()+")");
         }
         return PersonService.toPersonDto(personRepository.findElder());
     }
