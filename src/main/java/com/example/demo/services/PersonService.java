@@ -59,10 +59,11 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
                         "return Count(distinct child.name)");
-                var res = result.stream().findFirst().get().values().get(0).asInt();
-                return res;
+                return result.stream().findFirst().get().values().get(0).asInt();
             }
         }
+
+        return 0;
     }
 
     public PersonDto addNode(String name) throws Exception{
