@@ -27,19 +27,19 @@ public class PersonController {
 
     @PostMapping("/addChild")
     public PersonDto addChild(
-            @RequestParam("id") Integer id,
+            @RequestParam("id") String id,
             @RequestParam("name") String name) throws Exception {
-        return personService.addNodeWithRelationParent(name, id);
+        return personService.addNodeWithRelationParent(name, Integer.parseInt(id));
     }
 
     @PostMapping("/countCousins")
-    public Integer countCousin(@RequestParam("id") Integer id) throws Exception {
-        return personService.countCousins(id);
+    public Integer countCousin(@RequestParam("id") String id) throws Exception {
+        return personService.countCousins(Integer.parseInt(id));
     }
 
     @PostMapping("/countSiblings")
-    public Integer countSiblings(@RequestParam("id") Integer id) throws Exception {
-        return personService.countSiblings(id);
+    public Integer countSiblings(@RequestParam("id") String id) throws Exception {
+        return personService.countSiblings(Integer.parseInt(id));
     }
 
     @DeleteMapping("/deleteAll")
@@ -49,8 +49,8 @@ public class PersonController {
     }
 
     @DeleteMapping("/deleteNode")
-    public PersonDto deleteNode(@RequestParam("id") Integer id) throws Exception {
-        var person = personService.deleteNode(id);
+    public PersonDto deleteNode(@RequestParam("id") String id) throws Exception {
+        var person = personService.deleteNode(Integer.parseInt(id));
             if(person == null){
                 deleteAll();
             }
