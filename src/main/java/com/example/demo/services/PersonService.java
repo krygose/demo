@@ -48,10 +48,11 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
                         "return  count(DISTINCT child.name)");
-                var res = result.stream().findFirst().get().values().get(0).asInt();
                 return result.stream().findFirst().get().values().get(0).asInt();
             }
         }
+
+        return 0;
     }
 
     public int countCousins(int id) throws Exception{
