@@ -19,7 +19,7 @@ public class ProjApplication{
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("http://localhost:5173","https://drzewko-backend-1p4m.onrender.com")
+						.allowedOrigins("http://localhost:5173", "https://drzewko-backend-1p4m.onrender.com/")
 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH");
 			}
 		};
