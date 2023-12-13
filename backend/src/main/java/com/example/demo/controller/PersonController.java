@@ -21,8 +21,11 @@ public class PersonController {
     }
 
     @PostMapping("/addNode")
-    public PersonDto addNode() throws Exception {
-        return personService.addNode("czlek");
+    public PersonDto addNode(
+    @RequestParam("name") String name)
+            throws Exception {
+
+        return personService.addNode(name);
     }
 
     @PostMapping("/addChild")
