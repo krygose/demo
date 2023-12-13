@@ -96,7 +96,7 @@ public class PersonService {
                 if (Arrays.stream(splitName).count() > 1) {
                     personName = splitName[0] + splitName[1];
                 }
-                String trimName ="";
+                String trimName =name;
                 var splitName2 = name.split(" ");
                 if (Arrays.stream(splitName2).count() > 1) {
                     trimName = splitName2[0] + splitName2[1];
