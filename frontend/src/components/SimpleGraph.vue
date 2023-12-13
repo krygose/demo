@@ -6,7 +6,7 @@
         <form
           method="post"
           class="login-form z-2 mx-auto flex w-80 flex-col p-6"
-          @submit.prevent="addNode"
+          @submit.prevent="addChild"
         >
           <label for="parentIdField">Podaj id rodzica</label>
           <InputField
@@ -87,6 +87,23 @@
           </button>
           <div v-if="cousinsCount != ''">Węzeł ma {{ cousinsCount }} kuzynów</div>
         </form>
+        <form
+          method="post"
+          class="login-form z-2 mx-auto flex w-72 flex-col p-6"
+          @submit.prevent="addNode"
+        >
+          <label for="addNodeField">Podaj imię</label>
+          <InputField
+            v-model="addNodeField"
+            id="addNodeField"
+            class="mx-auto mb-2 flex h-8 w-full rounded-md border border-black"
+          />
+          <button
+            class="hover:bg-krygo-hre-gold h-8 rounded-md bg-black text-white hover:text-black"
+          >
+          Dodaj pierwszy węzeł
+        </button>
+        </form>
       </div>
     </div>
   </div>
@@ -113,7 +130,8 @@ export default {
       calculateSiblingsIdField: '',
       siblingsCount: '',
       calculateCousinsIdField: '',
-      cousinsCount: ''
+      cousinsCount: '',
+      addNodeField: ''
     }
   },
   async mounted() {
@@ -177,7 +195,7 @@ export default {
       console.log(response.data)
       this.fetchedTreeData = response.data
     },
-    async addNode() {
+    async addChild() {
       const response = await axios.post(
         'api/person/addChild',
         {},
@@ -244,7 +262,24 @@ export default {
       if (response.status == 200) {
         this.cousinsCount = response.data
       }
-    }
+    },
+    async addNode() {
+      const response = await axios.post(
+        'api/person/addNode',
+        {},
+        {
+          params: {
+            name: this.addNodeField
+          }
+        }
+      )
+
+      if (response.status == 200) {
+        console.log(response.status)
+        await this.fetchRoot()
+        await this.createTree()
+      }
+    },
   },
   computed: {}
 }

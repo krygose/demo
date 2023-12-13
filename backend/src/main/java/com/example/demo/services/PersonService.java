@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.model.Person;
 import com.example.demo.model.PersonDto;
+import com.fasterxml.jackson.core.sym.Name;
 import org.neo4j.driver.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -48,8 +49,11 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()-[:PARENT]->(child)\n" +
                         "return  count(DISTINCT child.name)");
-                if(result.stream().findFirst().get()!= null)
-                return result.stream().findFirst().get().values().get(0).asInt();
+
+                var test = result.stream().findFirst().get();
+                if(test != null) {
+                    return test.values().get(0).asInt();
+                }
                 else return 0;
             }
         }
@@ -61,8 +65,10 @@ public class PersonService {
             try (var sesion = driver.session()) {
                 var result = sesion.run("match (Person {id: '" + id + "'})<-[:PARENT]-()<-[:PARENT]-(grand)-[:PARENT]->(parents)-[:PARENT]->(child)\n" +
                         "return Count(distinct child.name)");
-                if(result.stream().findFirst().get()!= null)
-                return result.stream().findFirst().get().values().get(0).asInt();
+                var test = result.stream().findFirst().get();
+                if(test != null) {
+                    return test.values().get(0).asInt();
+                }
                 else return 0;
             }
         }
@@ -85,21 +91,26 @@ public class PersonService {
     public PersonDto addNodeWithRelationParent(String name, Integer personId) throws Exception{
         if(name != null && personId  > 0) {
             try (var sesion = driver.session()) {
-                String personName = personRepository.findById(personId.toString()).get().getName().toLowerCase().trim();
+                String personName = personRepository.findById(personId.toString()).orElse(null).getName().toLowerCase().trim();
                 var splitName = personName.split(" ");
                 if (Arrays.stream(splitName).count() > 1) {
                     personName = splitName[0] + splitName[1];
                 }
+                String trimName ="";
+                var splitName2 = name.split(" ");
+                if (Arrays.stream(splitName2).count() > 1) {
+                    trimName = splitName2[0] + splitName2[1];
+                }
                 sesion.run("MATCH (c:Count)\n" +
                         "SET c.count = c.count + 1\n" +
                         "WITH c.count AS newId\n" +
-                        "CREATE (" + name.toLowerCase().trim() + ":Person {id: toString(newId),name: \"" + name + "\"}\n)" +
+                        "CREATE (" + trimName + ":Person {id: toString(newId),name: \"" + name + "\"}\n)" +
                         "WITH * \n" +
                         "MATCH (c:Count)\n" +
                         "WITH c.count AS newId\n" +
-                        "match (" + personName + ":Person{id:'" + personId + "'}),(" + name.toLowerCase().trim() + ":Person {id: toString(newId)})\n" +
-                        "create (" + name.toLowerCase().trim() + ")<-[:PARENT]-(" + personName.trim() + ")\n" +
-                        "create (" + name.toLowerCase().trim() + ")-[:CHILD]->(" + personName.trim() + ")");
+                        "match (" + personName + ":Person{id:'" + personId + "'}),(" + trimName + ":Person {id: toString(newId)})\n" +
+                        "create (" + trimName + ")<-[:PARENT]-(" + personName.trim() + ")\n" +
+                        "create (" + trimName + ")-[:CHILD]->(" + personName.trim() + ")");
             }
         }
         return PersonService.toPersonDto(personRepository.findElder());
@@ -108,11 +119,20 @@ public class PersonService {
 
 
     private static PersonDto toPersonDto(Person person) {
-        return new PersonDto(
-                person.getId(),
-                person.getName(),
-                person.getChildren().stream()
-                        .map(PersonService::toPersonDto).toList());
+        if(person != null) {
+            return new PersonDto(
+                    person.getId(),
+                    person.getName(),
+                    person.getChildren().stream()
+                            .map(PersonService::toPersonDto).toList());
+        }
+        else{
+            Object List =new ArrayList<>();
+            return new PersonDto(
+                    0,
+                    "noname",
+                    (java.util.List<PersonDto>) List);
+        }
     }
 
     interface PersonRepository extends Neo4jRepository<Person, String> {
