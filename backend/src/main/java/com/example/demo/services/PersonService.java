@@ -77,11 +77,16 @@ public class PersonService {
 
     public PersonDto addNode(String name) throws Exception{
         if(name != null) {
+            String trimName =name;
+            var splitName2 = name.split(" ");
+            if (Arrays.stream(splitName2).count() > 1) {
+                trimName = splitName2[0] + splitName2[1];
+            }
             try (var sesion = driver.session()) {
                 sesion.run("MATCH (c:Count)\n" +
                         "            SET c.count = c.count + 1\n" +
                         "            WITH c.count AS newId\n" +
-                        "CREATE (" + name.toLowerCase().trim() + ":Person {id: toString(newId),name: \"" + name + "\"})");
+                        "CREATE (" + trimName + ":Person {id: toString(newId),name: \"" + name + "\"})");
             }
         }
         return PersonService.toPersonDto(personRepository.findElder());
